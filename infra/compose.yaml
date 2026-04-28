@@ -1,0 +1,15 @@
+name: "protocol_compose_stack"
+
+services:
+  rust_server:
+    build:
+      context: ..
+      dockerfile: infra/docker/rust.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - benchmark_net
+
+networks:
+  benchmark_net:
