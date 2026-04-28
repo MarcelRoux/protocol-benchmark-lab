@@ -1,0 +1,8 @@
+name: http_baseline
+protocol: http
+concurrency: 1
+duration_seconds: 5
+payload_size: 1024
+connection_reuse: true
+compression: false
+multiplexing: false
