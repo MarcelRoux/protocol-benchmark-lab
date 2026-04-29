@@ -54,7 +54,7 @@ To provide **reproducible, comparable measurements** across:
 
 ### 3. Large Payload
 
-- streass serialization / deserialization
+- stress serialization / deserialization
 
 ### 4. Streaming
 

@@ -88,7 +88,7 @@ UI / CLI
 ## Implementation (initial)
 
 - simple HTTP service
-- in-memroy run tracking
+- in-memory run tracking
 - synchronous execution acceptable for MVP
 
 ---

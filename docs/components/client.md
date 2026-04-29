@@ -6,7 +6,7 @@ The client is a **load generator and benchmark harness** responsible for:
 
 - generating traffic across protocols
 - controlling concurrency and payloads
-- collecting latency and througput metrics
+- collecting latency and throughput metrics
 - producing reproducible benchmark results
 
 It is a core component of the system:

@@ -22,7 +22,7 @@ This created:
 
 ## Decision
 
-Use a single serveice per language with multiple protocol adapters.
+Use a single service per language with multiple protocol adapters.
 
 ---
 
@@ -49,8 +49,8 @@ This repository is a **measurement system**, not a set of demos.
 The single-service model ensures:
 
 - consistency
--repeatablity
--realism
+- repeatability
+- realism
 
 ---
 
@@ -63,4 +63,3 @@ Rejected due to:
 - duplication
 - coordination complexity
 - reduced comparability
-a

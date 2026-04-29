@@ -68,7 +68,7 @@ The CLI interacts with the orchestrator:
 ```text
 Makefile
     |
-HTTP calll
+HTTP call
     |
 Orchestrator
     |
