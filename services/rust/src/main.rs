@@ -4,9 +4,7 @@ use axum::{
     routing::{get, post},
 };
 use std::time::Duration;
-use tokio;
 use tower_http::{timeout::TimeoutLayer, trace::TraceLayer};
-use tracing;
 
 #[tokio::main]
 async fn main() {
