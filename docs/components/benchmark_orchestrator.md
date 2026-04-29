@@ -15,7 +15,7 @@ It acts as the control plane between:
 ## Responsibilities
 
 - receive benchmark requests (from UI or CLI)
-- validate scenario configuration
+- validate scenario configuration against the canonical service contract
 - select target service + protocol
 - trigger client execution
 - collect and return results

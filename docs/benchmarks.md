@@ -2,11 +2,11 @@
 
 ## Purpose
 
-To provide **reproducible, comparable measurements** across:
+To provide **reproducible, comparable measurements** of the same canonical service across:
 
-- languages
-- protocols
-- configurations
+- languages (implementation dimension)
+- protocols (adapter/transport dimension)
+- configurations (scenario dimension)
 
 ---
 
@@ -68,6 +68,7 @@ To provide **reproducible, comparable measurements** across:
 - fixed test duration
 - identical payloads across runs
 - isolated environment (Docker)
+- identical logical contract and payload semantics across all language/protocol runs
 
 ---
 

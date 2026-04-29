@@ -2,11 +2,11 @@
 
 ## Overview
 
-This system is designed as a **multi-language, multi-protocol evaluation lab**.
+This system is designed as a **multi-language, multi-protocol evaluation lab** centered on one canonical service contract.
 
 The core idea:
 
-> Same logic, different transports, measurable outcomes.
+> Same canonical problem, different implementations/transports, measurable outcomes.
 
 ---
 
@@ -59,7 +59,7 @@ Each language exposes:
 
 - HTTP
 - WebSocket
--gRPC
+- gRPC
 
 Simultaneously.
 

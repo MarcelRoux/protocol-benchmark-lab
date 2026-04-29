@@ -95,7 +95,7 @@ Services
 
 ---
 
-## Rational
+## Rationale
 
 The Makefile provides:
 

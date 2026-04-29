@@ -34,7 +34,6 @@ Protocol Adapters
   - HTTP (Axum routes)
   - WebSocket (Axum WS)
   - gRPC (tonic)
-    -
 Instrumentation Layer
 ```
 
@@ -43,7 +42,7 @@ Instrumentation Layer
 ## Project Structure
 
 ```text
-servers/rust/
+services/rust/
   src/
     main.rs
     adapters/

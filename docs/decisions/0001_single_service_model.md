@@ -22,7 +22,7 @@ This created:
 
 ## Decision
 
-Use a single service per language with multiple protocol adapters.
+Use a single canonical logical service per language, exposed through multiple protocol adapters.
 
 ---
 
@@ -51,6 +51,8 @@ The single-service model ensures:
 - consistency
 - repeatability
 - realism
+
+This preserves "same problem, different implementations" as the primary experimental control.
 
 ---
 

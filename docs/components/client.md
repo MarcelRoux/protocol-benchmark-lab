@@ -10,7 +10,7 @@ The client is a **load generator and benchmark harness** responsible for:
 - producing reproducible benchmark results
 
 It is a core component of the system:
-> All comparisons are driven throug the client.
+> All comparisons are driven through the client.
 
 ---
 
@@ -78,7 +78,8 @@ clients/
 
 ## Scenario Model
 
-Each benchmark is defined as a scenario.
+Each benchmark is defined as a scenario.  
+Each scenario must exercise the same canonical service contract regardless of language or protocol.
 
 ### Example
 
