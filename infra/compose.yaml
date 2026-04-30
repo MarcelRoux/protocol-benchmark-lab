@@ -1,7 +1,18 @@
 name: "protocol_compose_stack"
 
 services:
-  rust_server:
+  orchestrator:
+    environment:
+      RUST_SERVICE_URL: http://rust_service:3000
+    build:
+      context: ..
+      dockerfile: infra/docker/orchestrator.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    networks:
+      - benchmark_net
+  rust_service:
     build:
       context: ..
       dockerfile: infra/docker/rust.Dockerfile
