@@ -112,31 +112,13 @@ Optional
 - minimal shared state
 - lock-free where possible
 
----
+### CPU-Bound Handlers
 
-## Design Notes
+CPU-bound endpoints (e.g. `/work/primes`) should avoid blocking the async runtime.
 
-- Avoid unnecessary allocations in hot paths
-- Prefer borrowing over cloning where possible
-- Keep protocol adapters thin
+Recommended approach:
 
----
+- use `tokio::task::spawn_blocking` for heavy computation
+- keep async handlers responsive
 
-## Extending
-
-- To add a new protocol:
-
-1. create adapter in `adapters/`
-2. map protocol -> core handler
-3. instrument metrics
-4. register in `main.rs`
-
----
-
-## Non-Goals
-
-- zero-allocation perfection
-- framework-level abstractions
-- production-grade hardening
-
-This is a comparative lab, not a production system.
+This ensures fair comparison with other runtimes under load.

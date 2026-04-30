@@ -39,6 +39,12 @@ To provide **reproducible, comparable measurements** of the same canonical servi
 | connection reuse | on / off |
 | compression | on / off |
 
+### Algorithm (CPU workloads)
+
+- brute
+- brute_odd_sqrt
+- sieve
+
 ---
 
 ## Scenarios
@@ -59,6 +65,21 @@ To provide **reproducible, comparable measurements** of the same canonical servi
 ### 4. Streaming
 
 - continuous message flow
+
+### 5. CPU Baseline
+
+- single request
+- CPU-bound computation (`/work/primes`)
+
+### 6. CPU Concurrency
+
+- multiple concurrent CPU-bound requests
+- observe contention and scheduling
+
+### 7. Mixed Workload
+
+- combine `/echo` and `/work/primes`
+- observe interaction between I/O and CPU
 
 ---
 

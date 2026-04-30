@@ -86,6 +86,17 @@ Only one dimension changes per test:
 
 ---
 
+### 4. Dual Workload Model
+
+The system supports two workload types:
+
+- I/O-bound: `/echo` (protocol-focused)
+- CPU-bound: `/work/primes` (runtime/concurrency-focused)
+
+This enables comparison across both transport efficiency and compute behavior.
+
+---
+
 ## Metrics Flow
 
 ```text
