@@ -1,9 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["services/rust"]
+members = ["orchestrator", "services/rust"]
 
 [workspace.dependencies]
-axum = { version = " 0.8.9" }
+axum = { version = "0.8.9" }
+serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.52.1", features = [
     "default",
     "rt-multi-thread",
