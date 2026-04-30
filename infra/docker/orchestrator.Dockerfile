@@ -14,11 +14,11 @@ RUN mkdir -p orchestrator/src services/rust/src \
 RUN cargo fetch
 
 # Target binary.
-COPY services/rust/src services/rust/src
-RUN cargo build --release --package rust
+COPY orchestrator/src orchestrator/src
+RUN cargo build --release --package orchestrator
 
 FROM debian:bookworm-slim
-COPY --from=builder /usr/src/app/target/release/rust /usr/local/bin/rust
+COPY --from=builder /usr/src/app/target/release/orchestrator /usr/local/bin/orchestrator
 EXPOSE 3000
 USER 1000
-CMD ["/usr/local/bin/rust"]
+CMD ["/usr/local/bin/orchestrator"]
