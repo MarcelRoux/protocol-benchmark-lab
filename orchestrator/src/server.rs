@@ -1,21 +1,6 @@
 use crate::app::state::AppState;
 use crate::http::routes::router;
 
-/*
-Plan:
-- Orchestrator is a thin wrapper to interface with load generator.
-- Load generator is initially built into the orchestrator for simplicity.
-- Load generator needs to be kept contained to simplify future refactor.
-
-Endpoint design:
---> GET  /health
-GET  /targets
-GET  /scenarios
-POST /benchmarks/run
-GET  /benchmarks/{run_id}
-GET  /benchmarks
-*/
-
 pub async fn run(state: AppState) {
     tracing_subscriber::fmt::init();
 

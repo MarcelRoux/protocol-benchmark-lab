@@ -26,6 +26,8 @@ async fn main() {
     let state = AppState {
         base_url: std::env::var("RUST_SERVICE_URL")
             .unwrap_or_else(|_| "http://localhost:3000".to_string()),
+        scenarios_dir: std::env::var("SCENARIOS_DIR")
+            .unwrap_or_else(|_| "../benchmarks/scenarios".to_string()),
     };
 
     run(state).await;
