@@ -17,8 +17,15 @@ RUN cargo fetch
 COPY orchestrator/src orchestrator/src
 RUN cargo build --release --package orchestrator
 
+# Final stage.
 FROM debian:bookworm-slim
+
+# Target binary.
 COPY --from=builder /usr/src/app/target/release/orchestrator /usr/local/bin/orchestrator
+
+# Dependencies.
+COPY benchmarks/scenarios /app/benchmarks/scenarios
+
 EXPOSE 3000
 USER 1000
 CMD ["/usr/local/bin/orchestrator"]

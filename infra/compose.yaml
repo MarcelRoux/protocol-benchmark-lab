@@ -4,6 +4,7 @@ services:
   orchestrator:
     environment:
       RUST_SERVICE_URL: http://rust_service:3000
+      SCENARIOS_DIR: /app/benchmarks/scenarios
     build:
       context: ..
       dockerfile: infra/docker/orchestrator.Dockerfile
