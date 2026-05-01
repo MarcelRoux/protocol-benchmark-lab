@@ -22,6 +22,60 @@ services:
       - "3000:3000"
     networks:
       - benchmark_net
+  postgres:
+    container_name: "${COMPOSE_PROJECT_NAME:-protocol_compose_stack}_postgres"
+    image: postgres:18
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=40
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_command=test ! -f /var/lib/postgresql/wal_archive/%f && cp %p
+        /var/lib/postgresql/wal_archive/%f
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-benchmark}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-benchmark}"
+      POSTGRES_DB: "${POSTGRES_DB:-benchmark}"
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - ../${DATA_ROOT:-data}/postgres:/var/lib/postgresql
+      - ../${DATA_ROOT:-data}/postgres_wal_archive:/var/lib/postgresql/wal_archive
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-benchmark} -d
+            ${POSTGRES_DB:-benchmark}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    mem_reservation: 256m
+    mem_limit: 1g
+    cpus: "1.00"
+    cpu_shares: 1024
+    pids_limit: 256
+    oom_score_adj: -800
+    stop_grace_period: 60s
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - benchmark_net
 
 networks:
   benchmark_net:
