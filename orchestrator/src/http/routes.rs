@@ -1,10 +1,21 @@
-use axum::{Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::get};
+use axum::{
+    Json, Router,
+    extract::State,
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::fs;
 use tower_http::{timeout::TimeoutLayer, trace::TraceLayer};
 
-use crate::app::state::AppState;
+use crate::loadgen::load_generator::LoadGenerator;
+use crate::{app::state::AppState, models::benchmarks::RunRequest};
+use crate::{
+    models::benchmarks::{Protocols, RunError, RunStatus},
+    storage::RunStorage,
+};
 
 /*
 Plan:
@@ -15,7 +26,7 @@ Plan:
 Endpoint design:
 --> GET  /health
 --> GET  /targets
-GET  /scenarios
+--> GET  /scenarios
 POST /benchmarks/run
 GET  /benchmarks/{run_id}
 GET  /benchmarks
@@ -26,6 +37,9 @@ pub fn router(state: AppState) -> Router {
         .route("/health", get(health))
         .route("/targets", get(targets))
         .route("/scenarios", get(scenarios))
+        .route("/benchmarks/run", post(benchmark_run))
+        // .route("/benchmarks/{run_id}", get(benchmark_fetch))
+        // .route("/benchmarks", get(benchmarks_fetch))
         .layer((
             TraceLayer::new_for_http(),
             TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(10)),
@@ -41,12 +55,6 @@ pub(crate) struct Health {
 
 pub(crate) async fn health() -> Json<Health> {
     Json(Health { status: "OK" })
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "lowercase")]
-enum Protocols {
-    Http,
 }
 
 #[derive(Serialize)]
@@ -146,4 +154,46 @@ pub(crate) async fn scenarios(
     out.sort_by(|a, b| a.file.cmp(&b.file));
 
     Ok(Json(out))
+}
+
+async fn benchmark_run(
+    State(state): State<AppState>,
+    Json(req): Json<RunRequest>,
+) -> Result<(StatusCode, Json<RunStatus>), (StatusCode, String)> {
+    let run_req = RunRequest {
+        language: req.language,
+        protocol: req.protocol,
+        scenario: req.scenario.clone(),
+    };
+    let run_id = state.storage.create(req).await.map_err(map_storage_err)?;
+
+    state
+        .storage
+        .mark_running(run_id)
+        .await
+        .map_err(map_storage_err)?;
+    let _result = state.loadgen.execute(&run_req); // stub result for now
+    let record = state
+        .storage
+        .mark_completed(run_id)
+        .await
+        .map_err(map_storage_err)?;
+
+    Ok((
+        StatusCode::ACCEPTED,
+        Json(RunStatus {
+            id: record.id,
+            status: record.status,
+        }),
+    ))
+}
+
+fn map_storage_err(err: RunError) -> (StatusCode, String) {
+    match err {
+        RunError::NotFound { .. } => (StatusCode::NOT_FOUND, "run not found".into()),
+        RunError::InvalidTransition { .. } => {
+            (StatusCode::CONFLICT, "invalid state transition".into())
+        }
+        RunError::Storage(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+    }
 }
