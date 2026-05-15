@@ -1,6 +1,6 @@
 use axum::{
     Json, Router,
-    extract::State,
+    extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
@@ -10,12 +10,10 @@ use std::time::Duration;
 use tokio::fs;
 use tower_http::{timeout::TimeoutLayer, trace::TraceLayer};
 
+use crate::app::state::AppState;
 use crate::loadgen::load_generator::LoadGenerator;
-use crate::{app::state::AppState, models::benchmarks::RunRequest};
-use crate::{
-    models::benchmarks::{Protocols, RunError, RunStatus},
-    storage::RunStorage,
-};
+use crate::models::benchmarks::{Protocols, RunError, RunId, RunRecord, RunRequest, RunStatus};
+use crate::storage::RunStorage;
 
 /*
 Plan:
@@ -38,8 +36,9 @@ pub fn router(state: AppState) -> Router {
         .route("/targets", get(targets))
         .route("/scenarios", get(scenarios))
         .route("/benchmarks/run", post(benchmark_run))
-        // .route("/benchmarks/{run_id}", get(benchmark_fetch))
-        // .route("/benchmarks", get(benchmarks_fetch))
+        .route("/benchmarks/{run_id}", get(benchmark_fetch))
+        .route("/benchmarks/{run_id}/cancel", post(benchmark_cancel))
+        .route("/benchmarks", get(benchmark_fetch_all))
         .layer((
             TraceLayer::new_for_http(),
             TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(10)),
@@ -172,10 +171,19 @@ async fn benchmark_run(
         .mark_running(run_id)
         .await
         .map_err(map_storage_err)?;
-    let _result = state.loadgen.execute(&run_req); // stub result for now
+    let result = match state.loadgen.execute(&run_req) {
+        Ok(res) => res,
+        Err(err) => {
+            let _ = state.storage.mark_failed(run_id).await;
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("loadgen failed: {err}"),
+            ));
+        }
+    };
     let record = state
         .storage
-        .mark_completed(run_id)
+        .mark_completed(run_id, result.summary, result.artifact_uri)
         .await
         .map_err(map_storage_err)?;
 
@@ -188,12 +196,45 @@ async fn benchmark_run(
     ))
 }
 
+async fn benchmark_fetch(
+    State(state): State<AppState>,
+    Path(run_id): Path<RunId>,
+) -> Result<Json<RunRecord>, (StatusCode, String)> {
+    state
+        .storage
+        .get(run_id)
+        .await
+        .map(Json)
+        .ok_or((StatusCode::NOT_FOUND, format!("run {run_id} not found")))
+}
+
+async fn benchmark_cancel(
+    State(state): State<AppState>,
+    Path(run_id): Path<RunId>,
+) -> Result<Json<RunStatus>, (StatusCode, String)> {
+    let record = state
+        .storage
+        .mark_cancelled(run_id)
+        .await
+        .map_err(map_storage_err)?;
+
+    Ok(Json(RunStatus {
+        id: record.id,
+        status: record.status,
+    }))
+}
+
+async fn benchmark_fetch_all(State(state): State<AppState>) -> Json<Vec<RunRecord>> {
+    Json(state.storage.list().await)
+}
+
 fn map_storage_err(err: RunError) -> (StatusCode, String) {
     match err {
-        RunError::NotFound { .. } => (StatusCode::NOT_FOUND, "run not found".into()),
-        RunError::InvalidTransition { .. } => {
-            (StatusCode::CONFLICT, "invalid state transition".into())
-        }
+        RunError::NotFound { run_id } => (StatusCode::NOT_FOUND, format!("run {run_id} not found")),
+        RunError::InvalidTransition { run_id, from, to } => (
+            StatusCode::CONFLICT,
+            format!("invalid transition for {run_id}: {from:?} -> {to:?}"),
+        ),
         RunError::Storage(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
     }
 }

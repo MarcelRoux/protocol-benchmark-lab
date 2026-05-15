@@ -38,19 +38,17 @@ impl RunStorage for InMemoryRunStorage {
 
         // Store RunRequest.
         let mut runs = self.runs.write().await;
-        runs.insert(record.id, record);
+        runs.insert(run_id, record);
 
         Ok(run_id)
     }
 
-    #[cfg(test)]
     async fn get(&self, run_id: RunId) -> Option<RunRecord> {
         let runs = self.runs.read().await;
 
         runs.get(&run_id).cloned()
     }
 
-    #[cfg(test)]
     async fn list(&self) -> Vec<RunRecord> {
         let runs = self.runs.read().await;
 
@@ -84,7 +82,12 @@ impl RunStorage for InMemoryRunStorage {
         Ok(record.clone())
     }
 
-    async fn mark_completed(&self, run_id: RunId) -> Result<RunRecord, RunError> {
+    async fn mark_completed(
+        &self,
+        run_id: RunId,
+        summary: String,
+        artifact_uri: String,
+    ) -> Result<RunRecord, RunError> {
         // Get mutable write reference.
         let mut runs = self.runs.write().await;
 
@@ -103,12 +106,13 @@ impl RunStorage for InMemoryRunStorage {
         // Mutate record.
         record.status = RunState::Completed;
         record.finished_at = Some(Utc::now().timestamp_millis());
+        record.summary = Some(summary);
+        record.artifact_uri = Some(artifact_uri);
 
         // Return clone.
         Ok(record.clone())
     }
 
-    #[cfg(test)]
     async fn mark_cancelled(&self, run_id: RunId) -> Result<RunRecord, RunError> {
         // Get mutable write reference.
         let mut runs = self.runs.write().await;
@@ -133,7 +137,6 @@ impl RunStorage for InMemoryRunStorage {
         Ok(record.clone())
     }
 
-    #[cfg(test)]
     async fn mark_failed(&self, run_id: RunId) -> Result<RunRecord, RunError> {
         // Get mutable write reference.
         let mut runs = self.runs.write().await;
@@ -228,7 +231,11 @@ mod tests {
             .expect("mark_running should succeed");
 
         let updated = storage
-            .mark_completed(run_id)
+            .mark_completed(
+                run_id,
+                "mock-summary".to_string(),
+                "artifacts/mock.json".to_string(),
+            )
             .await
             .expect("mark_completed should succeed from running");
 

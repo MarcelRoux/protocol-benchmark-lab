@@ -25,14 +25,14 @@ pub(crate) enum RunState {
     Cancelled,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct RunRequest {
     pub(crate) language: Languages,
     pub(crate) protocol: Protocols,
     pub(crate) scenario: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub(crate) struct RunStatus {
     pub(crate) id: RunId,
     pub(crate) status: RunState,
@@ -52,7 +52,7 @@ pub(crate) struct RunRecord {
     pub(crate) scenario: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub(crate) enum RunError {
     NotFound {
         run_id: RunId,
